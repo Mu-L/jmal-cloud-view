@@ -76,6 +76,11 @@
               <mfa-config/>
             </div>
           </el-tab-pane>
+          <el-tab-pane :label="$t('app.dynamicAddress')" name="9" class="setting-tab-panel">
+            <div v-if="activeName === '9'">
+              <dynamic-address-config/>
+            </div>
+          </el-tab-pane>
           <!--          <el-tab-pane :label="$t('common.lang')" name="7" class="setting-tab-panel">-->
           <!--            <div v-if="activeName === '7'">-->
           <!--              <language-config></language-config>-->
@@ -90,9 +95,10 @@
 <script>
 
 import config from '@/../package.json'
-import settingApi, { getSetting } from "@/api/setting-api";
+import settingApi from "@/api/setting-api";
 import Logo from "@/components/Logo";
 import UploadImageInput from "@/components/input/UploadImageInput.vue";
+import DynamicAddressConfig from '@/views/setting/cloudSetting/dynamicAddressConfig.vue'
 import LanguageConfig from '@/views/setting/cloudSetting/languageConfig.vue'
 import MfaConfig from '@/views/setting/cloudSetting/mfaConfig.vue'
 import OcrConfig from '@/views/setting/cloudSetting/ocrConfig.vue'
@@ -105,7 +111,7 @@ import TranscodeConfig from "@/views/setting/cloudSetting/transcodeConfig.vue";
 import OfficeConfig from "@/views/setting/cloudSetting/officeConfig.vue";
 
 export default {
-  components: { PersonalizationConfig, MfaConfig, OcrConfig, LanguageConfig, PreviewConfig, OfficeConfig, TranscodeConfig, LdapConfig, TaskProgress, UploadImageInput, Logo},
+  components: { DynamicAddressConfig, PersonalizationConfig, MfaConfig, OcrConfig, LanguageConfig, PreviewConfig, OfficeConfig, TranscodeConfig, LdapConfig, TaskProgress, UploadImageInput, Logo},
   data() {
     return {
       activeName: '1',

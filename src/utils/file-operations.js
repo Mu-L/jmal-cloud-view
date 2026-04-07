@@ -19,6 +19,8 @@ export const directLinkSubMenus = [
   { label: '复制', operation: 'copyDirectLink', iconClass: 'copy-link'},
 ]
 
+export const copyDynamicDirectLinkSubMenu = { label: '复制动态地址', operation: 'copyDynamicDirectLink', iconClass: 'copy-link' }
+
 export const fileArrangements = [
   { label: '名称 - 顺序', operation: 'orderName-ascending', orderProp: 'name', order: 'ascending'},
   { label: '名称 - 倒序', operation: 'orderName-descending', orderProp: 'name', order: 'descending'},
