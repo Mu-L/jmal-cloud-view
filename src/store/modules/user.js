@@ -1,4 +1,5 @@
 import { login, logout, getInfo, verifyTotp, initVerifyTotp } from '@/api/user'
+import settingApi from '@/api/setting-api'
 import { applyUserTheme } from '@/utils/theme'
 import fileApi from '@/api/file-api'
 import menuApi from '@/api/menu'
@@ -11,6 +12,20 @@ import { terminateSSE } from '@/sse/SSEClient'
 
 const setState = (state) => {
   localStorage.setItem('store', JSON.stringify(state))
+}
+
+const getDefaultDynamicAddressConfig = () => ({
+  enabled: false,
+  domain: '',
+})
+
+const normalizeDynamicAddressConfig = (config) => {
+  const normalizedConfig = config || {}
+
+  return {
+    enabled: normalizedConfig.enabled === true,
+    domain: typeof normalizedConfig.domain === 'string' ? normalizedConfig.domain.trim() : '',
+  }
 }
 
 const getDefaultState = () => {
@@ -40,7 +55,8 @@ const getDefaultState = () => {
     netdiskLogo: store ? store.netdiskLogo : '',
     exactSearch: store ? store.exactSearch : false,
     newVersion: store ? store.newVersion : '',
-    iframePreviewConfig: {}
+    iframePreviewConfig: {},
+    dynamicAddressConfig: store ? normalizeDynamicAddressConfig(store.dynamicAddressConfig) : getDefaultDynamicAddressConfig()
   }
 }
 
@@ -91,6 +107,9 @@ const mutations = {
   },
   SET_IFRAME_PREVIEW:(state, iframePreviewConfig) => {
     state.iframePreviewConfig = iframePreviewConfig;
+  },
+  SET_DYNAMIC_ADDRESS_CONFIG:(state, dynamicAddressConfig) => {
+    state.dynamicAddressConfig = normalizeDynamicAddressConfig(dynamicAddressConfig)
   }
 }
 
@@ -192,10 +211,34 @@ const actions = {
     setState(state)
   },
 
-  // get user info
-  getInfo({ commit, state }) {
+  fetchDynamicAddressConfig({ commit, state }) {
     return new Promise((resolve, reject) => {
-      getInfo().then(response => {
+      settingApi.getDynamicAddressConfig().then((response) => {
+        const dynamicAddressConfig = normalizeDynamicAddressConfig(response.data)
+        commit('SET_DYNAMIC_ADDRESS_CONFIG', dynamicAddressConfig)
+        setState(state)
+        resolve(dynamicAddressConfig)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  saveDynamicAddressConfig({ dispatch }, dynamicAddressConfig) {
+    const payload = normalizeDynamicAddressConfig(dynamicAddressConfig)
+    return new Promise((resolve, reject) => {
+      settingApi.updateDynamicAddressConfig(payload).then(() => {
+        dispatch('fetchDynamicAddressConfig').then(resolve).catch(reject)
+      }).catch(error => {
+        reject(error)
+      })
+    })
+  },
+
+  // get user info
+  getInfo({ commit, state, dispatch }) {
+    return new Promise((resolve, reject) => {
+      getInfo().then(async response => {
         const { data } = response
         if (!data) {
           // reject('Verification failed, please Login again.')
@@ -223,6 +266,11 @@ const actions = {
           commit('SET_NEW_VERSION', newVersion)
         } else {
           commit('SET_NEW_VERSION', '')
+        }
+        try {
+          await dispatch('fetchDynamicAddressConfig')
+        } catch (error) {
+          commit('SET_DYNAMIC_ADDRESS_CONFIG', getDefaultDynamicAddressConfig())
         }
         setLogo(netdiskName, netdiskLogo)
         setState(state)
@@ -337,4 +385,3 @@ export default {
   mutations,
   actions
 }
-

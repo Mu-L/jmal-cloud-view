@@ -10,6 +10,7 @@ const getters = {
   showName: state => state.user.showName,
   newVersion: state => state.user.newVersion,
   iframePreviewConfig: state => state.user.iframePreviewConfig,
+  dynamicAddressConfig: state => state.user.dynamicAddressConfig,
   userId: state => state.user.userId,
   userInfo: state => state.user.userInfo,
   menuList: state => state.user.menuList,

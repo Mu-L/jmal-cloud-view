@@ -2,6 +2,40 @@ import fileApi from '@/api/file-api'
 import store from '@/store'
 import { defaultPreviewConfig } from '@/utils/index'
 
+export function buildDirectFilePath(mark, file) {
+  const encodedName = encodeURIComponent(file.name);
+  const suffix = file.isFolder ? '.zip' : '';
+  return `/api/direct-file/${mark}/${encodedName}${suffix}`
+}
+
+function normalizeProtocol(protocol) {
+  return protocol || window.location.protocol
+}
+
+function parseDynamicAddress(addr, protocol) {
+  let parsedUrl
+
+  try {
+    parsedUrl = new URL(`${normalizeProtocol(protocol)}//${addr}`)
+  } catch (error) {
+    throw new Error('动态地址格式无效')
+  }
+
+  if (!parsedUrl.hostname || !parsedUrl.port) {
+    throw new Error('动态地址格式无效')
+  }
+
+  return parsedUrl
+}
+
+export function buildDynamicDirectFileUrl({ mark, file, addr, protocol, domain }) {
+  const dynamicAddressUrl = parseDynamicAddress(addr, protocol)
+  if (domain) {
+    dynamicAddressUrl.hostname = domain.trim()
+  }
+  return `${dynamicAddressUrl.origin}${buildDirectFilePath(mark, file)}`
+}
+
 function isFilePath(str) {
   // 匹配 test/r2/file.txt
   const filePathRegex = /^[\w\-\/]+[\u4e00-\u9fa5\w\-]+\.\w+$/;
@@ -183,8 +217,15 @@ export default {
     return null;
   },
   directFileUrl: function(mark, file) {
-    const encodedName = encodeURIComponent(file.name);
-    const suffix = file.isFolder ? '.zip' : '';
-    return `${window.location.origin}${this.baseUrl}/direct-file/${mark}/${encodedName}${suffix}`
+    return `${window.location.origin}${buildDirectFilePath(mark, file)}`
+  },
+  dynamicDirectFileUrl: function(mark, file, addr, domain) {
+    return buildDynamicDirectFileUrl({
+      mark,
+      file,
+      addr,
+      domain,
+      protocol: window.location.protocol,
+    })
   }
 }

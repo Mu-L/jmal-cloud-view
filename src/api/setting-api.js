@@ -1,5 +1,7 @@
 import request from '@/utils/request'
 
+export const DYNAMIC_ADDRESS_CHANNEL_ID = 'jmalcloud'
+
 export default {
   getPersonalizationConfig() {
     return request({
@@ -193,6 +195,25 @@ export default {
       url: '/office/config',
       method: 'put',
       data
+    })
+  },
+  getDynamicAddressConfig() {
+    return request({
+      url: '/website/setting/dynamic-address',
+      method: 'get',
+    })
+  },
+  updateDynamicAddressConfig(data) {
+    return request({
+      url: '/website/setting/dynamic-address',
+      method: 'put',
+      data
+    })
+  },
+  getDynamicAddress() {
+    return request({
+      url: `/stun/${DYNAMIC_ADDRESS_CHANNEL_ID}/address`,
+      method: 'get',
     })
   }
 }

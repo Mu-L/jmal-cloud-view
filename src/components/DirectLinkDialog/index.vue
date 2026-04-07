@@ -19,8 +19,29 @@
 
 
 import directFileApi from '@/api/direct-file'
+import settingApi from '@/api/setting-api'
 import fileConfig from '@/utils/file-config'
 import { copyText } from '@/utils/copy-text'
+
+function normalizeDirectLinkOptions(optionsOrIsCopy) {
+  if (typeof optionsOrIsCopy === 'boolean') {
+    return {
+      copy: optionsOrIsCopy,
+      mode: 'normal',
+    }
+  }
+
+  return {
+    copy: !!(optionsOrIsCopy && optionsOrIsCopy.copy),
+    mode: (optionsOrIsCopy && optionsOrIsCopy.mode) || 'normal',
+  }
+}
+
+function createHandledError(message) {
+  const error = new Error(message)
+  error.isHandledMessage = true
+  return error
+}
 
 export default {
   name: "DirectLinkDialog",
@@ -61,13 +82,42 @@ export default {
     dialogClose() {
       this.$emit('update:status', this.dialogVisible)
     },
-    getDirectLink(file, isCopy) {
-      directFileApi.createDirectLink({ fileId: file.id }).then(res => {
-        this.directUrl = fileConfig.directFileUrl(res.data, file)
-        if (isCopy) {
-          copyText(this.directUrl)
+    async buildDynamicDirectLink(mark, file) {
+      const dynamicAddressConfig = this.$store.getters.dynamicAddressConfig || {}
+      if (dynamicAddressConfig.enabled !== true) {
+        throw createHandledError(this.$t('msg.dynamicAddressDisabled').toString())
+      }
+
+      const response = await settingApi.getDynamicAddress()
+      const addr = typeof response.data === 'string' ? response.data.trim() : ''
+      if (!addr) {
+        throw createHandledError(this.$t('msg.dynamicAddressUnavailable').toString())
+      }
+
+      try {
+        return fileConfig.dynamicDirectFileUrl(mark, file, addr, dynamicAddressConfig.domain)
+      } catch {
+        throw createHandledError(this.$t('msg.dynamicAddressInvalidAddr').toString())
+      }
+    },
+    async getDirectLink(file, optionsOrIsCopy) {
+      const options = normalizeDirectLinkOptions(optionsOrIsCopy)
+
+      try {
+        const response = await directFileApi.createDirectLink({ fileId: file.id })
+        const mark = response.data
+        this.directUrl = options.mode === 'dynamic'
+          ? await this.buildDynamicDirectLink(mark, file)
+          : fileConfig.directFileUrl(mark, file)
+
+        if (options.copy) {
+          await copyText(this.directUrl)
         }
-      })
+      } catch (error) {
+        if (error && error.isHandledMessage) {
+          this.$message.error(error.message)
+        }
+      }
     },
     resetDirectLink() {
       this.resetLoading = true

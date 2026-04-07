@@ -1089,8 +1089,8 @@ export default {
     fileListTableClearSelection() {
       this.$refs.fileListTable.clearSelection()
     },
-    directLinkDialogGetDirectLink(file, isCopy) {
-      this.$refs.directLinkDialog.getDirectLink(file, isCopy)
+    directLinkDialogGetDirectLink(file, options) {
+      this.$refs.directLinkDialog.getDirectLink(file, options)
     }
   },
 }
