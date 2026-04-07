@@ -16,6 +16,17 @@
           <p class="instruction">{{ $t('app.dynamicAddressHintLine3') }}</p>
           <p class="instruction">{{ $t('app.dynamicAddressHintLine4') }}</p>
           <p class="instruction">{{ $t('app.dynamicAddressHintLine5') }}</p>
+          <p class="instruction">{{ $t('app.dynamicAddressHintLine6') }}</p>
+          <p class="instruction">{{ $t('app.dynamicAddressHintLine7') }}</p>
+          <pre class="instruction-code">{{ dynamicAddressUpdateCurlExample }}</pre>
+          <p class="instruction">
+            {{ $t('app.dynamicAddressHintLine8Prefix') }}
+            <router-link class="instruction-link" :to="dynamicAddressAccessTokenPath">
+              {{ $t('app.dynamicAddressHintLine8LinkText') }}
+            </router-link>
+            {{ $t('app.dynamicAddressHintLine8Suffix') }}
+          </p>
+          <p class="instruction">{{ $t('app.dynamicAddressHintLine9') }}</p>
         </div>
         <el-divider></el-divider>
       </div>
@@ -46,6 +57,11 @@
 </template>
 
 <script>
+import {
+  DYNAMIC_ADDRESS_ACCESS_TOKEN_PATH,
+  buildDynamicAddressUpdateCurlExample
+} from '@/utils/dynamic-address'
+
 const hostnamePattern = /^(?=.{1,253}$)(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)(?:\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?))*$/
 const ipv4Pattern = /^(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d{2}|[1-9]?\d)){3}$/
 
@@ -81,6 +97,16 @@ export default {
         ],
       },
     }
+  },
+  computed: {
+    dynamicAddressAccessTokenPath() {
+      return DYNAMIC_ADDRESS_ACCESS_TOKEN_PATH
+    },
+    dynamicAddressUpdateCurlExample() {
+      const origin = typeof window !== 'undefined' ? window.location.origin : ''
+
+      return buildDynamicAddressUpdateCurlExample({ origin })
+    },
   },
   mounted() {
     this.loadDynamicAddressConfig()
@@ -133,6 +159,21 @@ export default {
   .instruction {
     line-height: 1.7;
     margin: 0;
+  }
+
+  .instruction-code {
+    margin: 8px 0;
+    padding: 12px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    background: #f5f7fa;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  .instruction-link {
+    color: #409eff;
   }
 }
 </style>

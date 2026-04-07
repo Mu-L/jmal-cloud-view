@@ -1,6 +1,7 @@
 import request from '@/utils/request'
+import { DYNAMIC_ADDRESS_CHANNEL_ID } from '@/utils/dynamic-address'
 
-export const DYNAMIC_ADDRESS_CHANNEL_ID = 'jmalcloud'
+export { DYNAMIC_ADDRESS_CHANNEL_ID }
 
 export default {
   getPersonalizationConfig() {
